@@ -13,7 +13,7 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     context = config.getoption("--context")
     env_file = path.root_path(f'.env.{context}')
-    load_dotenv(dotenv_path=env_file)
+    load_dotenv(env_file)
 
 
 @pytest.fixture(scope="function", autouse=True)
