@@ -5,20 +5,23 @@ from dotenv import load_dotenv
 from selene import browser
 from utils import path, attach
 
-CONTEXT = "bstack"  # local_real,local_emulator
+
+def pytest_addoption(parser):
+    parser.addoption('--context', default='local_real')
 
 
-@pytest.fixture()
-def load_env():
-    dotenv_file = path.root_path(f".env.{CONTEXT}")
-    load_dotenv(dotenv_file)
+def pytest_configure(config):
+    context = config.getoption("--context")
+    env_file = path.root_path(f'.env.{context}')
+    load_dotenv(dotenv_path=env_file)
 
 
 @pytest.fixture(scope="function", autouse=True)
-def mobile_management(load_env):
+def mobile_management(request):
     with step("Setting up remote executor"):
+        launch_context = request.config.getoption("--context")
         from config import setup_config
-        driver_options = setup_config.setup_driver_options(context=CONTEXT)
+        driver_options = setup_config.setup_driver_options(context=launch_context)
         browser.config.driver = webdriver.Remote(setup_config.remote_url, options=driver_options)
     with step("Setting up timeout for browser"):
         browser.config.timeout = setup_config.timeout
@@ -28,7 +31,7 @@ def mobile_management(load_env):
     with step("Attaching screenshot, xml and video"):
         attach.add_xml(browser)
         attach.add_screenshot(browser)
-        if CONTEXT == "bstack":
+        if launch_context == "bstack":
             attach.add_video_mobile(browser)
 
     with step("Browser teardown"):

@@ -37,7 +37,7 @@ class Config(BaseModel):
                     "accessKey": self.access_key,
                 },
             )
-        if context == "emulator_local":
+        if context == "local_emulator":
             driver_options.set_capability("remote_url", self.remote_url)
             driver_options.set_capability("app", path.apk_path(self.app))
             driver_options.set_capability("appWaitActivity", self.app_wait)
